@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { authService, LoginData, RegisterData } from '../../services/authService'
 
 export interface User {
   id: string
@@ -24,19 +25,8 @@ const initialState: AuthState = {
 // Async thunks for auth operations
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }: { email: string; password: string }) => {
-    // This will be replaced with actual API call
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    
-    if (!response.ok) {
-      throw new Error('Login failed')
-    }
-    
-    const data = await response.json()
+  async (loginData: LoginData) => {
+    const data = await authService.login(loginData)
     localStorage.setItem('token', data.token)
     return data
   }
@@ -44,18 +34,8 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'auth/register',
-  async ({ email, password, name }: { email: string; password: string; name: string }) => {
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
-    })
-    
-    if (!response.ok) {
-      throw new Error('Registration failed')
-    }
-    
-    const data = await response.json()
+  async (registerData: RegisterData) => {
+    const data = await authService.register(registerData)
     localStorage.setItem('token', data.token)
     return data
   }

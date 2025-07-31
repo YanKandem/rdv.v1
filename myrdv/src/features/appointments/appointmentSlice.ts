@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { appointmentService } from '../../services/appointmentService'
 
 export interface TimeSlot {
   id: string
@@ -57,67 +58,43 @@ const initialState: AppointmentState = {
 export const fetchAppointmentTypes = createAsyncThunk(
   'appointments/fetchAppointmentTypes',
   async () => {
-    const response = await fetch('/api/appointment-types')
-    if (!response.ok) throw new Error('Failed to fetch appointment types')
-    return response.json()
+    return await appointmentService.getAppointmentTypes()
   }
 )
 
 export const fetchTimeSlots = createAsyncThunk(
   'appointments/fetchTimeSlots',
   async ({ date, appointmentTypeId }: { date: string; appointmentTypeId: string }) => {
-    const response = await fetch(`/api/time-slots?date=${date}&appointmentTypeId=${appointmentTypeId}`)
-    if (!response.ok) throw new Error('Failed to fetch time slots')
-    const data = await response.json()
-    return { date, slots: data }
+    const slots = await appointmentService.getTimeSlots(date, appointmentTypeId)
+    return { date, slots }
   }
 )
 
 export const bookAppointment = createAsyncThunk(
   'appointments/bookAppointment',
   async (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
-    const response = await fetch('/api/appointments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(appointmentData),
-    })
-    if (!response.ok) throw new Error('Failed to book appointment')
-    return response.json()
+    return await appointmentService.bookAppointment(appointmentData)
   }
 )
 
 export const fetchAppointments = createAsyncThunk(
   'appointments/fetchAppointments',
   async () => {
-    const response = await fetch('/api/appointments')
-    if (!response.ok) throw new Error('Failed to fetch appointments')
-    return response.json()
+    return await appointmentService.getAppointments()
   }
 )
 
 export const updateAppointmentStatus = createAsyncThunk(
   'appointments/updateAppointmentStatus',
   async ({ id, status }: { id: string; status: Appointment['status'] }) => {
-    const response = await fetch(`/api/appointments/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    })
-    if (!response.ok) throw new Error('Failed to update appointment status')
-    return response.json()
+    return await appointmentService.updateAppointmentStatus(id, status)
   }
 )
 
 export const createAppointmentType = createAsyncThunk(
   'appointments/createAppointmentType',
   async (appointmentType: Omit<AppointmentType, 'id'>) => {
-    const response = await fetch('/api/appointment-types', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(appointmentType),
-    })
-    if (!response.ok) throw new Error('Failed to create appointment type')
-    return response.json()
+    return await appointmentService.createAppointmentType(appointmentType)
   }
 )
 

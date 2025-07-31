@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { formService } from '../../services/formService'
 
 export interface FormField {
   id: string
@@ -46,46 +47,28 @@ const initialState: FormBuilderState = {
 export const fetchForms = createAsyncThunk(
   'formBuilder/fetchForms',
   async () => {
-    const response = await fetch('/api/forms')
-    if (!response.ok) throw new Error('Failed to fetch forms')
-    return response.json()
+    return await formService.getForms()
   }
 )
 
 export const saveForm = createAsyncThunk(
   'formBuilder/saveForm',
   async (form: Partial<AppointmentForm>) => {
-    const response = await fetch('/api/forms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    if (!response.ok) throw new Error('Failed to save form')
-    return response.json()
+    return await formService.createForm(form as any)
   }
 )
 
 export const updateForm = createAsyncThunk(
   'formBuilder/updateForm',
   async ({ id, ...form }: Partial<AppointmentForm> & { id: string }) => {
-    const response = await fetch(`/api/forms/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    if (!response.ok) throw new Error('Failed to update form')
-    return response.json()
+    return await formService.updateForm(id, form)
   }
 )
 
 export const publishForm = createAsyncThunk(
   'formBuilder/publishForm',
   async (id: string) => {
-    const response = await fetch(`/api/forms/${id}/publish`, {
-      method: 'POST',
-    })
-    if (!response.ok) throw new Error('Failed to publish form')
-    return response.json()
+    return await formService.publishForm(id)
   }
 )
 
